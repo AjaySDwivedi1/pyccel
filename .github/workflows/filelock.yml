@@ -23,7 +23,6 @@ jobs:
             python -m pip install .[test]
         shell: bash
       - name: Filelock tests with pytest
-        uses: ./.github/actions/pytest_run
         run: |
           python -m pytest -n auto -rXx -vs
         shell: bash
