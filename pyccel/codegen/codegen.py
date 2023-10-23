@@ -23,6 +23,7 @@ printer_registry    = {
                       }
 
 pyccel_stage = PyccelStage()
+errors = Errors()
 
 class Codegen(object):
 
@@ -146,7 +147,6 @@ class Codegen(object):
 
         # instantiate codePrinter
         code_printer = printer_registry[language]
-        errors = Errors()
         errors.set_parser_stage('codegen')
         # set the code printer
         self._printer = code_printer(self.parser.filename, **settings)
@@ -208,6 +208,9 @@ class Codegen(object):
         with open(stub_filename, 'w') as f:
             for line in code:
                 f.write(line)
+
+        # Set errors target back to current file
+        errors.set_target(self.parser.filename, 'file')
 
         # print module
         code = self._printer.doprint(self.ast)
