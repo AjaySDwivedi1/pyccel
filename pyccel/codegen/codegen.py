@@ -191,15 +191,23 @@ class Codegen(object):
         header_ext = _header_extension_registry[self._language]
 
         if filename is None: filename = self.name
-        header_filename = '{name}.{ext}'.format(name=filename, ext=header_ext)
-        filename = '{name}.{ext}'.format(name=filename, ext=ext)
+        header_filename = f'{filename}.{header_ext}'
+        stub_filename = f'{filename}.pyi'
+        filename = f'{filename}.{ext}'
 
         # print module header
+        header = ModuleHeader(self.ast)
         if header_ext is not None:
-            code = self._printer.doprint(ModuleHeader(self.ast))
+            code = self._printer.doprint(header)
             with open(header_filename, 'w') as f:
                 for line in code:
                     f.write(line)
+
+        # print stub file
+        code = PythonCodePrinter(stub_filename).doprint(header)
+        with open(stub_filename, 'w') as f:
+            for line in code:
+                f.write(line)
 
         # print module
         code = self._printer.doprint(self.ast)
