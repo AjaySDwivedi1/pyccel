@@ -184,6 +184,17 @@ class PythonCodePrinter(CodePrinter):
                     target = AsName(cls, name))
         return name
 
+    def _get_type_annotation(var):
+        if isinstance(var, Variable):
+            type_annotation = str(var.dtype)
+            if var.rank:
+                type_annotation += '[' + ','.join(':' for _ in range(var.rank)) + ']'
+            return f"'{type_annotation}'"
+        elif isinstance(var, FunctionAddress):
+            results = ', '.join(self._get_type_annotation(r.var) for r in var.results)
+            arguments = ', '.join(self._get_type_annotation(a.var) for a in var.arguments)
+            return f'"({results})({arguments})"'
+
     #----------------------------------------------------------------------
 
     def _print_dtype_argument(self, expr, init_dtype):
@@ -253,18 +264,7 @@ class PythonCodePrinter(CodePrinter):
             type_annotation = self._print(expr.annotation)
         else:
             var = expr.var
-            def get_type_annotation(var):
-                if isinstance(var, Variable):
-                    type_annotation = str(var.dtype)
-                    if var.rank:
-                        type_annotation += '[' + ','.join(':' for _ in range(var.rank)) + ']'
-                    return f"'{type_annotation}'"
-                elif isinstance(var, FunctionAddress):
-                    results = ', '.join(get_type_annotation(r.var) for r in var.results)
-                    arguments = ', '.join(get_type_annotation(a.var) for a in var.arguments)
-                    return f'"({results})({arguments})"'
-
-            type_annotation = get_type_annotation(var)
+            type_annotation = self._get_type_annotation(var)
 
         if expr.has_default:
             if isinstance(expr.value, FunctionDef):
@@ -971,6 +971,12 @@ class PythonCodePrinter(CodePrinter):
                         imports = imports,
                         body    = body,
                         prog    = prog)
+
+    def _print_Module_Header(self, expr):
+        variables = expr.variables
+        var_decl = '\n'.join(f"{v.name} : {self._get_type_annotation(v)}" for v in variables)
+        funcs = '\n'.join(self.function_signature(f) for f in expr.module.funcs)
+        return var_decl+'\n'+funcs
 
     def _print_PyccelPow(self, expr):
         base = self._print(expr.args[0])
