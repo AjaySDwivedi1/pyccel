@@ -2087,6 +2087,30 @@ class NumpySize(PyccelInternalFunction):
 
         return PyccelArrayShapeElement(a, axis)
 
+class NumpyDivide(PyccelInternalFunction):
+    """
+    Class representing a class to numpy.divide or numpy.true_divide in the user code.
+
+    Class representing a class to numpy.divide or numpy.true_divide in the user code.
+
+    Parameters
+    ----------
+    x1 : TypedAstNode
+        The dividend.
+    x2 : TypedAstNode
+        The divisor.
+    """
+    __slots__ = ()
+    name = 'divide'
+    def __new__(cls, x1, x2):
+        if x1.precision == -1:
+            prec = get_final_precision(x1)
+            x1 = DtypePrecisionToCastFunction[x1.dtype.name][prec](x1)
+        if x2.precision == -1:
+            prec = get_final_precision(x2)
+            x2 = DtypePrecisionToCastFunction[x2.dtype.name][prec](x2)
+        return PyccelDiv(x1, x2)
+
 #==============================================================================
 # TODO split numpy_functions into multiple dictionaries following
 # https://docs.scipy.org/doc/numpy-1.15.0/reference/routines.array-creation.html
@@ -2148,6 +2172,8 @@ numpy_funcs = {
     'product'   : PyccelFunctionDef('product'   , NumpyProduct),
     'linspace'  : PyccelFunctionDef('linspace'  , NumpyLinspace),
     'where'     : PyccelFunctionDef('where'     , NumpyWhere),
+    'divide'    : PyccelFunctionDef('divide'    , NumpyDivide),
+    'true_divide' : PyccelFunctionDef('true_divide', NumpyDivide),
     # ---
     'sign'      : PyccelFunctionDef('sign'      , NumpySign),
     'abs'       : PyccelFunctionDef('abs'       , NumpyAbs),
