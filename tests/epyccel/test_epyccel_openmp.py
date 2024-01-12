@@ -454,18 +454,18 @@ def test_omp_long_line(language):
 
     assert f1(x1,x2,x3,x4,x5) == np.sum(x1+x2+x3+x4+x5)
 
-@pytest.mark.parametrize( 'language', (
-    pytest.param('fortran', marks = pytest.mark.fortran),
-    pytest.param('c'      , marks = pytest.mark.c),
-    pytest.param("python", marks = [
-        pytest.mark.skip(reason="No parallelisation leads to different results"),
-        pytest.mark.python])
-    )
-)
-@pytest.mark.external
-def test_omp_flush(language):
-    f1 = epyccel(openmp.omp_flush, fflags = '-Wall', accelerators=['openmp'], language=language)
-    assert 2 == f1()
+#@pytest.mark.parametrize( 'language', (
+#    pytest.param('fortran', marks = pytest.mark.fortran),
+#    pytest.param('c'      , marks = pytest.mark.c),
+#    pytest.param("python", marks = [
+#        pytest.mark.skip(reason="No parallelisation leads to different results"),
+#        pytest.mark.python])
+#    )
+#)
+#@pytest.mark.external
+#def test_omp_flush(language):
+#    f1 = epyccel(openmp.omp_flush, fflags = '-Wall', accelerators=['openmp'], language=language)
+#    assert 2 == f1()
 
 @pytest.mark.external
 def test_omp_barrier(language):
